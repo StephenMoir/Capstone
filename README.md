@@ -1,26 +1,33 @@
-Breast Cancer Wisconsin (Diagnostic) Data Set
+BREAST CANCER PREDICTION
 
-Need to cover
-The project's domain background — the field of research where the project is derived;
-A problem statement — a problem being investigated for which a solution will be defined;
-The datasets and inputs — data or inputs being used for the problem;
-A solution statement — the solution proposed for the problem given;
-A benchmark model — some simple or historical model or result to compare the defined solution to;
-A set of evaluation metrics — functional representations for how the solution can be measured;
-An outline of the project design — how the solution will be developed and results obtained.
+Domain Background
+
+Breast cancer is when abnormal cells in the breast begin to grow and divide in an uncontrolled way and eventually form a growth (tumour).
+
+Breast cancer starts in the breast tissue, most commonly in the cells that line the milk ducts of the breast. It is the most common cancer in the UK. It mainly affects women, but men can get it too. [1]
+
+Sometimes a small sample of breast cells or breast tissue may be taken to help make a cancer diagnosis. This will usually be done using either [2]
+1. a core biopsy.
+2. a fine needle aspiration (FNA) or another procedure, such as
+3. a punch biopsy
+
+FNA uses a fine needle and syringe to take a sample of cells. The samples can then be examined under a microscope.
+
+Problem Statement
+
+Features are computed from a digitized image of a fine needle aspirate (FNA) on a breast mass. They describe characteristics of the cell nuclei present in the image.
+in the 3-dimensional space that is described in [3]
+
+These features are then used to predict whether the breast mass is malignant or benign
 
 
+The Datasets
 
-Features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass. They describe characteristics of the cell nuclei present in the image.
-n the 3-dimensional space is that described in: [K. P. Bennett and O. L. Mangasarian: "Robust Linear Programming Discrimination of Two Linearly Inseparable Sets", Optimization Methods and Software 1, 1992, 23-34].
+The dataset is available from Kaggle [4] and is described as the Breast Cancer Wisconsin (Diagnostic) Data Set
 
-This database is also available through the UW CS ftp server:
-ftp ftp.cs.wisc.edu
-cd math-prog/cpo-dataset/machine-learn/WDBC/
+This database is also available through the UW CS ftp server [5] and on the UCI Machine Learning Repository[6]
 
-Also can be found on UCI Machine Learning Repository: https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29
-
-Attribute Information:
+Kaggel [4] gives the following Attribute Information:
 
 1) ID number
 2) Diagnosis (M = malignant, B = benign)
@@ -44,8 +51,47 @@ largest values) of these features were computed for each image,
 resulting in 30 features. For instance, field 3 is Mean Radius, field
 13 is Radius SE, field 23 is Worst Radius.
 
-All feature values are recoded with four significant digits.
 
-Missing attribute values: none
+Solution Statement and Design
 
-Class distribution: 357 benign, 212 malignant
+After examination of the dataset for missing values and basic characteristics, variable reduction will be investigated using Principal Component Analysis
+
+The reduced variable dataset will then be separated into build and test datasets
+
+Machine Learning techniques available within Amazon Sagemaker will be deployed on the reduced variable datasets in order to initially assess accuracy. Potential methods include
+  Linear Learner
+  XG Boost
+  Neural Network
+
+A further examination focusing on the Model recall as the dominant metric will be conducted, reflecting the importance of avoiding a False Negative result
+
+A benchmark model
+
+A possible solution to the task on Kaggle is presented by the Kaggle expert Nisa Soylu [7]
+
+This uses Logistic Regression on normalised variables and the solution has an accuracy 97.7%
+
+Evaluation Metrics
+
+The following metrics will be utilised
+False Positive Rates
+False Negative Rates
+True Positive Rates
+True Negative Rates
+
+This will additionally allow
+Precision
+Recall
+Accuracy
+
+to then be measured
+
+Accuracy will form the comparison with the benchmark model however Recall will also be explored
+
+[1] https://www.cancerresearchuk.org/about-cancer/breast-cancer?gclid=EAIaIQobChMI_afA-eSO7AIVRM3tCh23CgMjEAAYASAAEgLI9_D_BwE&gclsrc=aw.ds
+[2] https://breastcancernow.org/information-support/have-i-got-breast-cancer/core-biopsy-fine-needle-aspiration-fna?gclid=EAIaIQobChMI54rj9-KO7AIVSebtCh2eVQctEAAYASAAEgI0D_D_BwE
+[3][K. P. Bennett and O. L. Mangasarian: "Robust Linear Programming Discrimination of Two Linearly Inseparable Sets", Optimization Methods and Software 1, 1992, 23-34].
+[4]https://www.kaggle.com/uciml/breast-cancer-wisconsin-data
+[5] ftp ftp.cs.wisc.edu cd math-prog/cpo-dataset/machine-learn/WDBC/
+[6]  https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Wisconsin+%28Diagnostic%29
+[7] https://www.kaggle.com/nisasoylu/machine-learning-implementation-on-cancer-dataset
