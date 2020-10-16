@@ -3,7 +3,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 
 
-## TODO: Complete this classifier
+## classifier
 class BinaryClassifier(nn.Module):
     """
     Define a neural network that performs binary classification.
@@ -15,7 +15,7 @@ class BinaryClassifier(nn.Module):
     BCELoss is binary cross entropy loss, documentation: https://pytorch.org/docs/stable/nn.html#torch.nn.BCELoss
     """
 
-    ## TODO: Define the init function, the input params are required (for loading code in train.py to work)
+    ## Define the init function, the input params are required (for loading code in train.py to work)
     def __init__(self, input_features, hidden_dim, output_dim):
         """
         Initialize the model by setting up linear layers.
@@ -39,7 +39,7 @@ class BinaryClassifier(nn.Module):
         self.a2 = nn.Sigmoid()
 
     
-    ## TODO: Define the feedforward behavior of the network
+    ## Define the feed forward behavior of the network
     def forward(self, x):
         """
         Perform a forward pass of our model on input features, x.

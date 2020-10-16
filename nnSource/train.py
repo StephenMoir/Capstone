@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import pandas as pd
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -37,11 +38,17 @@ def model_fn(model_dir):
     print("Done loading model.")
     return model
 
-# Gets training data in batches from the train.csv file
+# Gets training data in batches from the nntrain.csv file
+#def _get_train_data_loader(batch_size, training_dir):
+#    print("Get train data loader.")
+
+#    train_data = pd.read_csv(os.path.join(training_dir, "nntrain.csv"), header=None, names=None)
+#    return torch.utils.data.DataLoader(train_ds, batch_size=batch_size)
+
 def _get_train_data_loader(batch_size, training_dir):
     print("Get train data loader.")
 
-    train_data = pd.read_csv(os.path.join(training_dir, "train.csv"), header=None, names=None)
+    train_data = pd.read_csv(os.path.join(training_dir, "nntrain.csv"), header=None, names=None)
 
     train_y = torch.from_numpy(train_data[[0]].values).float().squeeze()
     train_x = torch.from_numpy(train_data.drop([0], axis=1).values).float()
@@ -50,9 +57,22 @@ def _get_train_data_loader(batch_size, training_dir):
 
     return torch.utils.data.DataLoader(train_ds, batch_size=batch_size)
 
+# Gets test data in batches from the nntest.csv file
+def _get_test_data_loader(batch_size, training_dir):
+    print("Get test data loader.")
+
+    test_data = pd.read_csv(os.path.join(training_dir, "nntest.csv"), header=None, names=None)
+
+    test_y = torch.from_numpy(test_data[[0]].values).float().squeeze()
+    test_x = torch.from_numpy(test_data.drop([0], axis=1).values).float()
+
+    test_ds = torch.utils.data.TensorDataset(test_x, test_y)
+
+    return torch.utils.data.DataLoader(test_ds, batch_size=batch_size)
+
 
 # Provided training function
-def train(model, train_loader, epochs, criterion, optimizer, device):
+def train(model, train_loader,  epochs, criterion, optimizer, device):
     """
     This is the training method that is called by the PyTorch training script. The parameters
     passed are as follows:
@@ -63,6 +83,8 @@ def train(model, train_loader, epochs, criterion, optimizer, device):
     optimizer    - The optimizer to use during training.
     device       - Where the model and data should be loaded (gpu or cpu).
     """
+    
+    #train_losses = []
     
     # training loop is provided
     for epoch in range(1, epochs + 1):
@@ -88,11 +110,63 @@ def train(model, train_loader, epochs, criterion, optimizer, device):
             optimizer.step()
             
             total_loss += loss.data.item()
+            
+        
+        #train_losses.append(total_loss/len(trainloader))
 
-        print("Epoch: {}, Loss: {}".format(epoch, total_loss / len(train_loader)))
+        print("Epoch: {}, Training Loss: {}".format(epoch, total_loss / len(train_loader)))
+        
+    #return train_losses 
 
+# Provided training function
+def test(model, test_loader, epochs, criterion, optimizer, device):
+    """
+    This is the training method that is called by the PyTorch training script. The parameters
+    passed are as follows:
+    model        - The PyTorch model that we wish to train.
+    test_loader  - The PyTorch DataLoader that should be used to check epoch overfitting.
+    epochs       - The total number of epochs to train for.
+    criterion    - The loss function used for training. 
+    optimizer    - The optimizer to use during training.
+    device       - Where the model and data should be loaded (gpu or cpu).
+    """
+    
+    test_losses = []
+    
+    # training loop is provided
+    for epoch in range(1, epochs + 1):
+        model.train() # Make sure that the model is in training mode.
 
-## TODO: Complete the main code
+        test_loss = 0
+        
+        # Turn off gradients for validation, saves memory and computations
+        with torch.no_grad():
+            model.eval()
+                
+            for tbatch in test_loader:
+                # get data
+                tbatch_x, tbatch_y = tbatch
+
+                tbatch_x = tbatch_x.to(device)
+                tbatch_y = tbatch_y.to(device)
+
+                
+    
+                # get predictions from model
+                ty_pred = model(tbatch_x)
+            
+                # perform backprop
+                tloss = criterion(ty_pred, tbatch_y)
+            
+                test_loss += tloss.data.item()
+        
+ 
+    test_losses.append(test_loss/len(testloader))
+    print("Epoch: {}, Test Loss    : {}".format(epoch, total_loss / len(train_loader)))
+        
+    return test_losses
+
+## main code
 if __name__ == '__main__':
     
     # All of the model parameters and training parameters are sent as arguments
@@ -139,11 +213,13 @@ if __name__ == '__main__':
 
     # Load the training data.
     train_loader = _get_train_data_loader(args.batch_size, args.data_dir)
-
-
-    ## --- Your code here --- ##
     
-    ## TODO:  Build the model by passing in the input params
+    # Load the test data.
+    test_loader = _get_test_data_loader(args.batch_size, args.data_dir)
+
+    # TYPICAL UPDATE SECTION
+    
+    ## Build the model by passing in the input params
     # To get params from the parser, call args.argument_name, ex. args.epochs or ards.hidden_dim
     # Don't forget to move your model .to(device) to move to GPU , if appropriate
     
@@ -157,8 +233,11 @@ if __name__ == '__main__':
 
     # Trains the model (given line of code, which calls the above training function)
     train(model, train_loader, args.epochs, criterion, optimizer, device)
+    
+    #pd.DataFrame(train_losses).to_csv(os.path.join(training_dir, 'training_loss.csv'))
+    #pd.DataFrame(test_losses).to_csv(os.path.join(training_dir, 'test_loss.csv'))
 
-    ## TODO: complete in the model_info by adding three argument names, the first is given
+    ## TODO: complete in the model_info by adding three argument names for model architecture
     # Keep the keys of this dictionary as they are 
     model_info_path = os.path.join(args.model_dir, 'model_info.pth')
     with open(model_info_path, 'wb') as f:
